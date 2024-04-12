@@ -65,7 +65,7 @@ optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 
 
 # %%
-num_epochs = 25
+num_epochs = 50
 
 autoencoder.train() #Set model to training mode
 for epoch in range(num_epochs): 

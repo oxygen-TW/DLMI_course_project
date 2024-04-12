@@ -17,10 +17,10 @@ class AutoEncoder(nn.Module):
             nn.ReLU(True),
             nn.Linear(1280, 640),
             nn.ReLU(True),
-            nn.Linear(640,32),
+            nn.Linear(640,128),
         )
         self.decoder = nn.Sequential(
-            nn.Linear(32, 640),
+            nn.Linear(128, 640),
             nn.ReLU(True),
             nn.Linear(640, 1280),
             nn.ReLU(True),
