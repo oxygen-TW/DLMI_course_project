@@ -1,7 +1,7 @@
 import os
 import random
 
-def load_data(data_root, use="train", data_type="normal"):
+def load_data(data_root, use="train", data_type="negative"):
     """
     Load data from data_root and return a list of all the files in the specified data path.
     """
@@ -21,8 +21,8 @@ def load_data(data_root, use="train", data_type="normal"):
     if not os.path.exists(data_path):
         raise FileNotFoundError("Data path does not exist")
     
-    #Return the all the files in the data path
-    return os.listdir(data_path)
+    #Return the all the files in the data path with data_root
+    return [os.path.join(data_path, f) for f in os.listdir(data_path) if os.path.isfile(os.path.join(data_path, f))]
     
 def randomly_load_data(data_root="", split_ratio=(0.7, 0.15, 0.15), random_seed=None):
     """
@@ -46,10 +46,13 @@ def randomly_load_data(data_root="", split_ratio=(0.7, 0.15, 0.15), random_seed=
     for u in use:
         for d in data_type:
             data = load_data(data_root, u, d)
-            if d == "normal":
+            if d == "negative":
                 normal_data.extend(data)
             else:
                 covid_data.extend(data)
+
+    assert len(normal_data) > 0, "No normal data found"
+    assert len(covid_data) > 0, "No covid data found"
 
     random.shuffle(normal_data)
     random.shuffle(covid_data)
@@ -92,5 +95,5 @@ def randomly_load_data(data_root="", split_ratio=(0.7, 0.15, 0.15), random_seed=
 
 if(__name__ == "__main__"):
     DATA_ROOT = "/Group16T/raw_data/covid_cxr/"
-    # print(load_data(data_root=DATA_ROOT, use="test", data_type="COVID"))
+    # print(load_data(data_root=DATA_ROOT, use="train", data_type="NEGATIVE"))
     print(randomly_load_data(data_root="/Group16T/raw_data/covid_cxr/", split_ratio=(0.7, 0.15, 0.15)))
