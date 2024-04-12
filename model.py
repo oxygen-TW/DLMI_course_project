@@ -11,22 +11,22 @@ class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Linear(3 * 256 * 256, 1024),  # Adjust the input size
+            nn.Linear(3 * 128 * 128, 6400),  # Adjust the input size
             nn.ReLU(True),
-            nn.Linear(1024, 128),  # Adjust the input size
+            nn.Linear(6400, 1280),  # Adjust the input size
             nn.ReLU(True),
-            nn.Linear(128, 64),
+            nn.Linear(1280, 640),
             nn.ReLU(True),
-            nn.Linear(64,8),
+            nn.Linear(640,32),
         )
         self.decoder = nn.Sequential(
-            nn.Linear(8, 64),
+            nn.Linear(32, 640),
             nn.ReLU(True),
-            nn.Linear(64, 128),
+            nn.Linear(640, 1280),
             nn.ReLU(True),
-            nn.Linear(128, 1024),
+            nn.Linear(1280, 6400),
             nn.ReLU(True),
-            nn.Linear(1024, 3 * 256 * 256),
+            nn.Linear(6400, 3 * 128 * 128),
             nn.Tanh(),
         )  # Adjust the output size
 
@@ -37,5 +37,5 @@ class AutoEncoder(nn.Module):
         x = x.view(x.size(0), -1)  # Flatten the input tensor
         x = self.encoder(x)
         x = self.decoder(x)
-        x = x.view(x.size(0), 3, 256, 256)  # Reshape back to original image shape
+        x = x.view(x.size(0), 3, 128, 128)  # Reshape back to original image shape
         return x
