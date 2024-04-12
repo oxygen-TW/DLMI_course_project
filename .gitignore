@@ -161,3 +161,4 @@ cython_debug/
 
 #Ignore Model files
 *.pth
+run_exp.sh
