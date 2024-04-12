@@ -1,7 +1,7 @@
 import os
 import random
 
-def load_data(data_root="", use="train", data_type="normal"):
+def load_data(data_root, use="train", data_type="normal"):
     """
     Load data from data_root and return a list of all the files in the specified data path.
     """
@@ -10,7 +10,7 @@ def load_data(data_root="", use="train", data_type="normal"):
     data_type = data_type.lower()
 
     assert use in ["train", "val", "test"], "use parameter must be \"train\", \"val\", or \"test\""
-    assert data_type  in ["normal", "covid"], "use parameter must be \"normal\", \"covid\""
+    assert data_type  in ["positive", "negative"], "use parameter must be \"positive\" or \"negative\""
 
     #check if data_root exists
     if not os.path.exists(data_root):
@@ -38,7 +38,7 @@ def randomly_load_data(data_root="", split_ratio=(0.7, 0.15, 0.15), random_seed=
     random.seed(random_seed)
 
     use = ["train", "val", "test"]
-    data_type = ["normal", "covid"]
+    data_type = ["positive", "negative"]
 
     normal_data = []
     covid_data = []
@@ -93,4 +93,4 @@ def randomly_load_data(data_root="", split_ratio=(0.7, 0.15, 0.15), random_seed=
 if(__name__ == "__main__"):
     DATA_ROOT = "/Group16T/raw_data/covid_cxr/"
     # print(load_data(data_root=DATA_ROOT, use="test", data_type="COVID"))
-    print(randomly_load_data(data_root=DATA_ROOT, split_ratio=(0.7, 0.15, 0.15)))
+    print(randomly_load_data(data_root="/Group16T/raw_data/covid_cxr/", split_ratio=(0.7, 0.15, 0.15)))
