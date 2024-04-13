@@ -7,6 +7,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torch.autograd import Variable
+from torch.utils.data import Subset
 from model import AutoEncoder
 from tqdm import tqdm 
 import numpy as np
@@ -30,7 +31,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 数据预处理
 transform_train = transforms.Compose([
     transforms.Resize((128, 128)),  # 调整图片大小
-    transforms.RandomRotation(10),
+    # transforms.RandomRotation(10),
     transforms.ToTensor(),  # 将图片转换为Tensor
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), #[-1, 1]
 ])
@@ -46,15 +47,17 @@ base_path = '/Group16T/raw_data/covid_cxr'
 
 # 加载数据集
 train_dataset = datasets.ImageFolder(root=f'{base_path}/train', transform=transform_train)
-val_dataset = datasets.ImageFolder(root=f'{base_path}/val', transform=transform)
-test_dataset = datasets.ImageFolder(root=f'{base_path}/test', transform=transform)
+
+# 過濾出特定類別的索引
+neg_class_indices = [i for i, (_, label) in enumerate(train_dataset.samples) if train_dataset.classes[label] == 'negative']
+
+# 使用這些索引來建立一個子集
+negative_train_dataset = Subset(train_dataset, neg_class_indices)
 
 # 创建数据加载器
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, pin_memory=True, num_workers=16)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, pin_memory=True, num_workers=16)
-test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, pin_memory=True, num_workers=16)
+train_loader = DataLoader(negative_train_dataset, batch_size=32, shuffle=True, pin_memory=True, num_workers=16)
 
-print(f"train_dataset: {len(train_dataset)}, val_dataset: {len(val_dataset)}, test_dataset: {len(test_dataset)}")
+print(f"train_dataset: {len(train_dataset)}, negative_train_dataset: {len(negative_train_dataset)}")
 
 # 初始化模型
 autoencoder = AutoEncoder().to(device)
@@ -65,7 +68,7 @@ optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 
 
 # %%
-num_epochs = 50
+num_epochs = 25
 
 autoencoder.train() #Set model to training mode
 for epoch in range(num_epochs): 
@@ -95,3 +98,4 @@ for epoch in range(num_epochs):
 #Save model
 torch.save(autoencoder.state_dict(), save_path)
 print(f"Model saved to {save_path}")
+# %%
