@@ -8,12 +8,13 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 from torch.utils.data import Subset
-from model import AutoEncoder
+from model import AutoEncoder, ConvAEN
 from tqdm import tqdm 
 import numpy as np
 
 # %%
-save_path = 'model_128.pth'
+save_path = 'model_Conv.pth'
+num_epochs = 25
 
 # %%
 if torch.cuda.is_available():
@@ -30,14 +31,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 数据预处理
 transform_train = transforms.Compose([
-    transforms.Resize((128, 128)),  # 调整图片大小
-    # transforms.RandomRotation(10),
+    # transforms.Resize((128, 128)),  # 调整图片大小
+    transforms.CenterCrop((128, 128)),
+    transforms.RandomRotation(10),
     transforms.ToTensor(),  # 将图片转换为Tensor
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), #[-1, 1]
 ])
 
 transform = transforms.Compose([
-    transforms.Resize((128, 128)),  # 调整图片大小
+    # transforms.Resize((128, 128)),  # 调整图片大小
+    transforms.CenterCrop((128, 128)),
     transforms.ToTensor(),  # 将图片转换为Tensor
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), #[-1, 1]
 ])
@@ -60,7 +63,10 @@ train_loader = DataLoader(negative_train_dataset, batch_size=32, shuffle=True, p
 print(f"train_dataset: {len(train_dataset)}, negative_train_dataset: {len(negative_train_dataset)}")
 
 # 初始化模型
-autoencoder = AutoEncoder().to(device)
+# autoencoder = AutoEncoder().to(device)
+autoencoder = ConvAEN().to(device)
+
+print(autoencoder)
 
 # 损失函数和优化器
 loss_func = nn.MSELoss()
@@ -68,31 +74,31 @@ optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 
 
 # %%
-num_epochs = 25
-
 autoencoder.train() #Set model to training mode
+train_loss = []
 for epoch in range(num_epochs): 
     epoch_start_time = datetime.now()  # 记录epoch开始的时间 
 
-    train_loss = 0
     # 使用tqdm包装数据加载器，以显示进度条
+    loss = 0
     train_loader_pbar = tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs} [Train]')
     for data in train_loader_pbar:
         img, _ = data  # img is in shape (batch_size, 3, 64, 64) / I don't need label and patient_id in training
-        img_flat = img.view(img.size(0), -1)  # Flatten img for the model input
-        img_flat = Variable(img_flat).to(device)
+        # img_flat = img.view(img.size(0), -1)  # Flatten img for the model input
+        # img_flat = Variable(img_flat).to(device)
+        img = img.to(device)
         # ===================forward=====================
-        output = autoencoder(img_flat)
+        output = autoencoder.forward(img)
         output = output.view(img.size(0), 3, 128, 128)  # Reshape output to original shape for loss calculation
         loss = loss_func(output, img.to(device))  # Use original shape img for loss calculation
         # ===================backward====================
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+    
+    train_loss.append(loss.item())
     # ===================log========================       
-    train_loader_pbar.set_description(
-                f'Epoch {epoch+1}/{num_epochs} '
-                f'[Train] Loss: {train_loss/len(train_loader_pbar):.4f}')
+    # train_loader_pbar.set_postfix(f'Loss: {train_loss/len(train_loader_pbar):.4f}')
     
 
 #Save model
