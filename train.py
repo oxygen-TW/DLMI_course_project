@@ -1,4 +1,5 @@
 # %%
+import os
 import torch
 import torch.nn as nn
 from datetime import datetime
@@ -14,7 +15,7 @@ import numpy as np
 
 # %%
 save_path = 'model_Conv.pth'
-num_epochs = 50
+num_epochs = 70
 
 # %%
 if torch.cuda.is_available():
@@ -31,7 +32,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 数据预处理
 transform_train = transforms.Compose([
-    # transforms.Resize((128, 128)),  # 调整图片大小
+    # transforms.Resize((256, 256)),  # 调整图片大小
     transforms.CenterCrop((128, 128)),
     transforms.RandomRotation(10),
     transforms.ToTensor(),  # 将图片转换为Tensor
@@ -64,6 +65,7 @@ img = img.permute(1, 2, 0)
 img = img.numpy()
 img = (img + 1) / 2
 plt.imshow(img)
+plt.savefig('output/after_transform.png')
 plt.show()
 
 # 创建数据加载器
@@ -113,4 +115,11 @@ for epoch in range(num_epochs):
 #Save model
 torch.save(autoencoder.state_dict(), save_path)
 print(f"Model saved to {save_path}")
-# %%
+
+#%%
+with open(os.path.join("output", 'train_loss.txt'), 'w', encoding="utf-8") as f:
+    f.write(str(train_loss))
+    f.close()
+
+print("Train loss saved to 'output/train_loss.txt'")
+
