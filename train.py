@@ -14,7 +14,7 @@ import numpy as np
 
 # %%
 save_path = 'model_Conv.pth'
-num_epochs = 25
+num_epochs = 50
 
 # %%
 if torch.cuda.is_available():
@@ -40,7 +40,8 @@ transform_train = transforms.Compose([
 
 transform = transforms.Compose([
     # transforms.Resize((128, 128)),  # 调整图片大小
-    transforms.CenterCrop((128, 128)),
+    transforms.CenterCrop((256, 256)),
+    transforms.Resize((128, 128)),  # 调整图片大小
     transforms.ToTensor(),  # 将图片转换为Tensor
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), #[-1, 1]
 ])
@@ -56,6 +57,14 @@ neg_class_indices = [i for i, (_, label) in enumerate(train_dataset.samples) if 
 
 # 使用這些索引來建立一個子集
 negative_train_dataset = Subset(train_dataset, neg_class_indices)
+
+#save negative_train_dataset[0] as a sample
+img, _ = negative_train_dataset[0]
+img = img.permute(1, 2, 0)
+img = img.numpy()
+img = (img + 1) / 2
+plt.imshow(img)
+plt.show()
 
 # 创建数据加载器
 train_loader = DataLoader(negative_train_dataset, batch_size=32, shuffle=True, pin_memory=True, num_workers=16)
