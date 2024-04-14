@@ -3,9 +3,12 @@ Course project of Deep Learning in Medical Image.
 
 # Project structure
 
-- `data_tool.py`: Contains functions for loading and splitting data.(Docs: [data_tool.md](docs/data_tool.md))
-- `train.py`: Contains the training script.
+- `output/`: The folder where the trained model, logs and plots are saved.
+- `docs/`: The folder where contains the documentation of the project.
+- `train.py`: Contains the training script(For model training only).
 - `model.py`: Contains the model architecture.
+- `evaluate.py`: Contains the evaluation script(You can train the model in this script if you want).
+- `data_tool.py`: Contains functions for loading and splitting data.(Docs: [data_tool.md](docs/data_tool.md))
 
 ## Dataset structure
 
